@@ -1,0 +1,23 @@
+{
+  "name": "supplyme",
+  "version": "1.0.0",
+  "description": "Def Hacks 2020",
+  "main": "index.js",
+  "dependencies": {
+    "sql": "^0.78.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Def-Hacks-2020/SupplyME.git"
+  },
+  "author": "Andrew, Sohil, Raeed, Saffat",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Def-Hacks-2020/SupplyME/issues"
+  },
+  "homepage": "https://github.com/Def-Hacks-2020/SupplyME#readme"
+}
