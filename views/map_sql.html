@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../assets/launcher.png" type="image/x-icon">
+    <title>Supply Me Map</title>
+    <style></style>
+</head>
+
+<body>
+    <div id="map" style="width: 100%; height: 800px;"></div>
+    <h1 style="text-align: center;">Tracking Status</h1>
+    <div class="tracking-status" style="margin-left: 100px;">
+        <br>
+        <h3>5000 Masks 🡆 At your local warehouse</h3>
+        <br>
+        <h3>10000 Masks 🡆 Shipping to local warehouse</h3>
+        <br>
+        <h3>500 Ventilators 🡆 Awaiting Payment</h3>
+    </div>
+</body>
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOonoY7LIvlYYiG319PloED5zVq7MUfkM&callback=initMap"
+    type="text/javascript"></script>
+<script>
+    function initMap() {
+
+        let xhr = new XMLHttpRequest;
+        let link = "https://v7dij9pl9d.execute-api.us-east-2.amazonaws.com/StageOne";
+        xhr.open('GET', link, true)
+
+        xhr.onload = function()
+        {
+            if (this.status === 200) 
+            {
+                var json = JSON.parse(this.responseText);
+                if(json.statusCode == 200)
+                {
+                    var array = json.body;
+                    addPoints(array);
+                }
+            }
+        }
+        xhr.send();
+    }
+
+    function addPoints(array)
+    {
+        var points = [];
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 14
+        });
+
+        var avglat = 0;
+        var avglng = 0;
+
+        for(var i = 0; i < array.length; i++)
+        {
+            var place = array[i];
+            var coords = {
+                lat: place.coordinatelat,
+                lng: place.coordinatelng
+            };
+            avglat = avglat + place.coordinatelat;
+            avglng = avglng + place.coordinatelng;
+            var marker = new google.maps.Marker({
+                position: coords,
+                map: map,
+                label: place.name
+            });
+            points.push(marker);
+        }
+        avglat = avglat/array.length;
+        avglng = avglng/array.length;
+        map.setCenter(new google.maps.LatLng(avglat,avglng));
+    }
+</script>
+
+</html>
