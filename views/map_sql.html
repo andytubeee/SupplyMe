@@ -128,7 +128,10 @@
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOonoY7LIvlYYiG319PloED5zVq7MUfkM&callback=initMap"
     type="text/javascript"></script>
 <script>
+    var array;
     function initMap() {
+        var directionsService = new google.maps.DirectionsService;
+        var directionsRenderer = new google.maps.DirectionsRenderer;
 
         let xhr = new XMLHttpRequest;
         let link = "https://v7dij9pl9d.execute-api.us-east-2.amazonaws.com/StageOne";
@@ -138,13 +141,45 @@
             if (this.status === 200) {
                 var json = JSON.parse(this.responseText);
                 if (json.statusCode == 200) {
-                    var array = json.body;
+                    array = json.body;
                     addPoints(array);
                 }
             }
         }
         xhr.send();
+
+        directionsRenderer.setMap(map);
+        calculateAndDisplayRoute(directionsService, directionsRenderer);
     }
+
+    //Waypoint Routing
+    function calculateAndDisplayRoute(directionsService, directionsRenderer) {
+        var waypts = [];
+        var checkboxArray = array;
+        for (var i = 0; i < checkboxArray.length; i++) {
+          if (checkboxArray.options[i].selected) {
+            waypts.push({
+              location: checkboxArray[i].value,
+              stopover: true
+            });
+          }
+        }
+
+        directionsService.route({
+          origin: array[0],
+          destination: array[1],
+          waypoints: waypts,
+          optimizeWaypoints: true,
+          travelMode: 'DRIVING'
+        }, function(response, status) {
+          if (status === 'OK') {
+            directionsRenderer.setDirections(response);
+            var route = response.routes[0];
+          } else {
+            window.alert('Directions request failed due to ' + status);
+          }
+        });
+      }
 
     function addPoints(array) {
         var points = [];
