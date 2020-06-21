@@ -64,11 +64,12 @@
             label: "Walmart"
         });
         directionsRenderer.setMap(map);
+        calculateAndDisplayRoute(directionsService, directionsRenderer);
     }
     //Waypoint Routing
     function calculateAndDisplayRoute(directionsService, directionsRenderer) {
         var waypts = [];
-        var checkboxArray = document.getElementById('waypoints');
+        var checkboxArray = [postOfficeCoord, walmartCoord, costcoCoord];
         for (var i = 0; i < checkboxArray.length; i++) {
           if (checkboxArray.options[i].selected) {
             waypts.push({
@@ -88,17 +89,6 @@
           if (status === 'OK') {
             directionsRenderer.setDirections(response);
             var route = response.routes[0];
-            var summaryPanel = document.getElementById('directions-panel');
-            summaryPanel.innerHTML = '';
-            // For each route, display summary information.
-            for (var i = 0; i < route.legs.length; i++) {
-              var routeSegment = i + 1;
-              summaryPanel.innerHTML += '<b>Route Segment: ' + routeSegment +
-                  '</b><br>';
-              summaryPanel.innerHTML += route.legs[i].start_address + ' to ';
-              summaryPanel.innerHTML += route.legs[i].end_address + '<br>';
-              summaryPanel.innerHTML += route.legs[i].distance.text + '<br><br>';
-            }
           } else {
             window.alert('Directions request failed due to ' + status);
           }
