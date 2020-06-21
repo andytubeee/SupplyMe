@@ -9,26 +9,54 @@
 </head>
 
 <body>
-    <div id="map" style="width: 100%; height: 500px;"></div>
+    <div id="map" style="width: 100%; height: 800px;"></div>
     <h1 style="text-align: center;">Tracking Status</h1>
-    <br>
-    <h3></h3>
+    <div class="tracking-status" style="margin-left: 100px;">
+        <br>
+        <h3>5000 Masks 🡆 At your local warehouse</h3>
+        <br>
+        <h3>10000 Masks 🡆 Shipping to local warehouse</h3>
+        <br>
+        <h3>500 Ventilators 🡆 Awaiting Payment</h3>
+    </div>
 </body>
 <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOonoY7LIvlYYiG319PloED5zVq7MUfkM&callback=initMap"
     type="text/javascript"></script>
 <script>
-    var washington = {
-        lat: 38.9072,
-        lng: -77.0369
-    };
-    // The map, centered at Uluru
-    var map;
-
     function initMap() {
-        map = new google.maps.Map(document.getElementById("map"), {
-            center: washington,
-            zoom: 8
+        var postOfficeCoord = {
+            lat: 38.919780,
+            lng: -76.959760
+        };
+        var costcoCoord = {
+            lat: 38.920400,
+            lng: -76.950430
+        }
+        var walmartCoord = {
+            lat: 38.900639,
+            lng: -77.011711
+        }
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 14,
+            center: postOfficeCoord
+        });
+
+        var PostOfficemarker = new google.maps.Marker({
+            position: postOfficeCoord,
+            map: map,
+            label: "Post Office"
+        });
+        var Costcomarker = new google.maps.Marker({
+            position: costcoCoord,
+            map: map,
+            label: "Costco"
+        });
+        var Walmartmarker = new google.maps.Marker({
+            position: walmartCoord,
+            map: map,
+            label: "Walmart"
         });
     }
 </script>
