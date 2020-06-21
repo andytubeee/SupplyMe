@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../assets/launcher.png" type="image/x-icon">
+    <title>Supply Me Map</title>
+    <style>.pure-material-button-contained {
+        position: relative;
+        display: inline-block;
+        box-sizing: border-box;
+        border: none;
+        border-radius: 4px;
+        padding: 0 16px;
+        min-width: 64px;
+        height: 36px;
+        vertical-align: middle;
+        text-align: center;
+        text-overflow: ellipsis;
+        text-transform: uppercase;
+        color: grey;
+        background-color: white;
+        box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+        font-family: 'Montserrat', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 36px;
+        overflow: hidden;
+        outline: none;
+        cursor: pointer;
+        transition: box-shadow 0.2s;
+    }
+    
+    .pure-material-button-contained::-moz-focus-inner {
+        border: none;
+    }
+    
+    /* Overlay */
+    .pure-material-button-contained::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    
+    /* Ripple */
+    .pure-material-button-contained::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        border-radius: 50%;
+        padding: 50%;
+        width: 32px; /* Safari */
+        height: 32px; /* Safari */
+        background-color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1);
+        transition: opacity 1s, transform 0.5s;
+    }
+    
+    /* Hover, Focus */
+    .pure-material-button-contained:hover,
+    .pure-material-button-contained:focus {
+        box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+    }
+    
+    .pure-material-button-contained:hover::before {
+        opacity: 0.08;
+    }
+    
+    .pure-material-button-contained:focus::before {
+        opacity: 0.24;
+    }
+    
+    .pure-material-button-contained:hover:focus::before {
+        opacity: 0.3;
+    }
+    
+    /* Active */
+    .pure-material-button-contained:active {
+        box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+    }
+    
+    .pure-material-button-contained:active::after {
+        opacity: 0.32;
+        transform: translate(-50%, -50%) scale(0);
+        transition: transform 0s;
+    }
+    
+    /* Disabled */
+    .pure-material-button-contained:disabled {
+        color: rgba(var(--pure-material-onsurface-rgb, 0, 0, 0), 0.38);
+        background-color: rgba(var(--pure-material-onsurface-rgb, 0, 0, 0), 0.12);
+        box-shadow: none;
+        cursor: initial;
+    }
+    
+    .pure-material-button-contained:disabled::before {
+        opacity: 0;
+    }
+    
+    .pure-material-button-contained:disabled::after {
+        opacity: 0;
+    }</style>
+</head>
+
+<body>
+    <button onclick="location.href='index.html';" class="pure-material-button-contained">Home</button>
+    <div id="map" style="width: 100%; height: 840px; margin-top: 10px;"></div>
+    <h1 style="text-align: center;">Tracking Status</h1>
+    <div class="tracking-status" style="margin-left: 100px;">
+        <br>
+        <h3>5000 Masks 🡆 At your local warehouse</h3>
+        <br>
+        <h3>10000 Masks 🡆 Shipping to local warehouse</h3>
+        <br>
+        <h3>500 Ventilators 🡆 Awaiting Payment</h3>
+    </div>
+</body>
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAOonoY7LIvlYYiG319PloED5zVq7MUfkM&callback=initMap"
+    type="text/javascript"></script>
+<script>
+    var array;
+    function initMap() {
+
+        let xhr = new XMLHttpRequest;
+        let link = "https://v7dij9pl9d.execute-api.us-east-2.amazonaws.com/StageOne";
+        xhr.open('GET', link, true)
+
+        xhr.onload = function () {
+            if (this.status === 200) {
+                var json = JSON.parse(this.responseText);
+                if (json.statusCode == 200) {
+                    array = json.body;
+                    addPoints(array);
+                }
+            }
+        }
+        xhr.send();
+    }
+
+    //Waypoint Routing
+    function calculateAndDisplayRoute(directionsService, directionsRenderer, array) {
+        directionsService.route({
+          origin: new google.maps.LatLng(array[0].coordinatelat, array[0].coordinatelng),
+          destination: new google.maps.LatLng(array[1].coordinatelat, array[1].coordinatelng),
+          travelMode: 'DRIVING'
+        }, function(response, status) {
+          if (status === 'OK') {
+            directionsRenderer.setDirections(response);
+            var route = response.routes[0];
+          } else {
+            window.alert('Directions request failed due to ' + status);
+          }
+        });
+      }
+
+    function addPoints(array) {
+        var directionsService = new google.maps.DirectionsService;
+        var markeroptions = {
+            visible : false,
+        }
+        var options = {
+            markerOptions: markeroptions,
+        }
+        var directionsRenderer = new google.maps.DirectionsRenderer(options);
+
+        var points = [];
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 15
+        });
+
+        var avglat = 0;
+        var avglng = 0;
+
+        for (var i = 0; i < array.length; i++) {
+            var place = array[i];
+            var coords = {
+                lat: place.coordinatelat,
+                lng: place.coordinatelng
+            };
+            avglat = avglat + place.coordinatelat;
+            avglng = avglng + place.coordinatelng;
+
+            var contentString = "<p>" + place.name + "<br />Type: " + place.generaltype + " : " + place.specifictype + "<br />";
+            if(place.generaltype == "Producer")
+            {
+                contentString = contentString + "Prduces " + place.amount + " units of " + place.producttype + " per day";
+            }
+            else if (place.generaltype == "Storage")
+            {
+                contentString = contentString + "Can store " + place.amount + " units of " + place.producttype;
+            }
+            else if (place.generaltype == "Consumer")
+            {
+                contentString = contentString + "Needs " + place.amount + " units of " + place.producttype;
+            }
+            contentString = contentString + "</p>";
+
+            var marker = new google.maps.Marker({
+                position: coords,
+                map: map
+            });
+            marker.infowindow = new google.maps.InfoWindow({
+                content: contentString
+            });
+            marker.addListener('mouseover', function() {
+                this.infowindow.open(map, this);
+            });
+            marker.addListener('mouseout', function() {
+                this.infowindow.close();
+            });
+
+            points.push(marker);
+        }
+        avglat = avglat / array.length;
+        avglng = avglng / array.length;
+        map.setCenter(new google.maps.LatLng(avglat, avglng));
+
+        directionsRenderer.setMap(map);
+        calculateAndDisplayRoute(directionsService, directionsRenderer, array);
+    }
+</script>
+
+</html>
